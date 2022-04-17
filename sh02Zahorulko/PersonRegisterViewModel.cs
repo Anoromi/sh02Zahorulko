@@ -14,14 +14,6 @@ namespace sh02Zahorulko
     {
         private Action<string> notify;
 
-        //private Dependency<string> firstName;
-        //public string FirstName { get => firstName.Value; set => firstName.Value = value; }
-        //private Dependency<string> lastName;
-        //public string LastName { get => lastName.Value; set => lastName.Value = value; }
-        //private Dependency<string> address;
-        //public string Address { get => address.Value; set => address.Value = value; }
-        //private Dependency<DateTime?> birthday;
-        //public DateTime? Birthday { get => birthday.Value; set => birthday.Value = value; }
         private Dependency<bool> active;
         public bool Active { get => active.Value; set => active.Value = value; }
         public string FirstName { get; set; } = "";
@@ -38,7 +30,7 @@ namespace sh02Zahorulko
 
 
         private Dependency<Person?> person;
-        public Person? Person { get => person.Value; 
+        public Person? Person { get => person.Value;
             set => person.Value = value; }
 
 
@@ -88,10 +80,6 @@ namespace sh02Zahorulko
         public PersonRegisterViewModel()
         {
             notify = (s) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(s));
-            //firstName = new("", nameof(FirstName), notify);
-            //lastName = new("", nameof(LastName), notify);
-            //address = new("", nameof(Address), notify);
-            //birthday = new(null, nameof(Birthday), notify);
             active = new(true, nameof(Active), notify);
             person = new(null, nameof(Person), notify);
             error = new(null, nameof(Error), postAction: (s) => { if (s is not null) MessageBox.Show(s); });
