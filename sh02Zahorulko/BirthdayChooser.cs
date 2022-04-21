@@ -35,11 +35,11 @@ namespace sh01Zahorulko
             }
         }
 
-        public BirthdayDate(DateTime date)
+        private BirthdayDate(DateTime date)
         {
             Date = date;
-            WesternZodiac = westernFromDateTime(date);
-            ChineseZodiac = chineseFromDateTime(date);
+            WesternZodiac = WesternFromDateTime(date);
+            ChineseZodiac = ChineseFromDateTime(date);
 
         }
 
@@ -48,7 +48,7 @@ namespace sh01Zahorulko
             return Date.Month == at.Month && Date.Day == at.Day;
         }
 
-        static WesternZodiac westernFromDateTime(in DateTime date)
+        static WesternZodiac WesternFromDateTime(in DateTime date)
         {
             var normalizedDate = new DateTime(2000, date.Month, date.Day);
             ReadOnlySpan<int> increments = stackalloc [] { 29, 30, 29, 30, 31, 30, 30, 30, 29, 30, 28 };
@@ -67,7 +67,7 @@ namespace sh01Zahorulko
             return (WesternZodiac)selected;
         }
 
-        static ChineseZodiac chineseFromDateTime(in DateTime date)
+        static ChineseZodiac ChineseFromDateTime(in DateTime date)
         {
             var nomalizedYear = (date.Year - 1924) % 12;
             if (nomalizedYear < 0) nomalizedYear = 12 + nomalizedYear;
@@ -94,6 +94,11 @@ namespace sh01Zahorulko
             if (error == null)
                 return res;
             else throw new Exception(error);
+        }
+
+        public override string ToString()
+        {
+            return Date.ToString();
         }
     }
 
