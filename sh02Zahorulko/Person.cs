@@ -7,6 +7,7 @@ using sh01Zahorulko;
 
 namespace sh02Zahorulko
 {
+    [Serializable]
     public class Person
     {
         public string FirstName { get; init; }

@@ -1,18 +1,18 @@
-﻿using sh01Zahorulko;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using sh01Zahorulko;
 
 namespace sh02Zahorulko
 {
 
     public class PersonRegisterViewModel : INotifyPropertyChanged
     {
-        private Action<string> notify;
+        private readonly Action<string> notify;
 
         private Dependency<bool> active;
         public bool Active { get => active.Value; set => active.Value = value; }
@@ -30,8 +30,11 @@ namespace sh02Zahorulko
 
 
         private Dependency<Person?> person;
-        public Person? Person { get => person.Value;
-            set => person.Value = value; }
+        public Person? Person
+        {
+            get => person.Value;
+            set => person.Value = value;
+        }
 
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -56,9 +59,9 @@ namespace sh02Zahorulko
             {
                 address = new Address(AddressPath);
             }
-            catch (ArgumentException)
+            catch (IllegalAddress e)
             {
-                Error = "Illegal address";
+                Error = e.Message;
                 return;
             }
             BirthdayDate birthdayDate;
@@ -66,7 +69,12 @@ namespace sh02Zahorulko
             {
                 birthdayDate = BirthdayDate.Parse(Birthday!.Value);
             }
-            catch (Exception e)
+            catch (TooOldException e)
+            {
+                Error = e.Message;
+                return;
+            }
+            catch (NotYetBornException e)
             {
                 Error = e.Message;
                 return;

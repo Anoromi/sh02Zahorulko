@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace sh02Zahorulko
 {
     /// <summary>
-    /// Interaction logic for LableField.xaml
+    /// Interaction logic for DateField.xaml
     /// </summary>
     public partial class DateField : UserControl
     {

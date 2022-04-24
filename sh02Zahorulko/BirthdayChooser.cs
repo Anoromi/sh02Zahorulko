@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace sh01Zahorulko
@@ -15,32 +18,20 @@ namespace sh01Zahorulko
         Water, Fish, Ram, Bull, Twins, Crab, Lion, Maiden, Scales, Scorpion, Archer, Goat
     }
 
+    [Serializable]
     public class BirthdayDate
     {
         public DateTime Date { get; private set; }
         public WesternZodiac WesternZodiac { get; }
         public ChineseZodiac ChineseZodiac { get; }
-        public int Years
-        {
-            get
-            {
-                var today = DateTime.Today;
-                var partialYears = today.Year - Date.Year;
-                var day = Date switch
-                {
-                    { Day: 29, Month: 2 } when !DateTime.IsLeapYear(today.Year) => 28,
-                    _ => Date.Day
-                };
-                return partialYears + (new DateTime(today.Year, Date.Month, day) > today ? -1 : 0);
-            }
-        }
+        public int Years { get; }
 
         private BirthdayDate(DateTime date)
         {
             Date = date;
             WesternZodiac = WesternFromDateTime(date);
             ChineseZodiac = ChineseFromDateTime(date);
-
+            Years = YearDifference(date, DateTime.Today);
         }
 
         public bool IsBirthDay(DateTime at)
@@ -48,10 +39,10 @@ namespace sh01Zahorulko
             return Date.Month == at.Month && Date.Day == at.Day;
         }
 
-        static WesternZodiac WesternFromDateTime(in DateTime date)
+        public static WesternZodiac WesternFromDateTime(in DateTime date)
         {
             var normalizedDate = new DateTime(2000, date.Month, date.Day);
-            ReadOnlySpan<int> increments = stackalloc [] { 29, 30, 29, 30, 31, 30, 30, 30, 29, 30, 28 };
+            ReadOnlySpan<int> increments = stackalloc[] { 29, 30, 29, 30, 31, 30, 30, 30, 29, 30, 28 };
             var previous = new DateTime(2000, 1, 20);
             int? selected = null;
             for (int i = 0; i < increments.Length; i++)
@@ -67,33 +58,32 @@ namespace sh01Zahorulko
             return (WesternZodiac)selected;
         }
 
-        static ChineseZodiac ChineseFromDateTime(in DateTime date)
+        public static ChineseZodiac ChineseFromDateTime(in DateTime date)
         {
             var nomalizedYear = (date.Year - 1924) % 12;
             if (nomalizedYear < 0) nomalizedYear = 12 + nomalizedYear;
             return (ChineseZodiac)nomalizedYear;
         }
 
-        public static string? TryParse(DateTime date, out BirthdayDate res)
+        private static int YearDifference(DateTime f, DateTime s)
         {
-            res = null!;
-            var cur = DateTime.Now;
-            if (cur < date)
-                return "You shouldn't even exist";
-            if (cur.Year - date.Year > 123)
-                return "You should have died already";
-
-            res = new(date);
-            return null;
+            var partialYears = f.Year - s.Year;
+            var day = s switch
+            {
+                { Day: 29, Month: 2 } when !DateTime.IsLeapYear(f.Year) => 28,
+                _ => s.Day
+            };
+            return partialYears + (new DateTime(f.Year, s.Month, day) > f ? -1 : 0);
         }
 
         public static BirthdayDate Parse(DateTime date)
         {
-            var error = TryParse(date, out var res);
-
-            if (error == null)
-                return res;
-            else throw new Exception(error);
+            var cur = DateTime.Now;
+            if (cur < date)
+                throw new NotYetBornException(date);
+            if (YearDifference(cur, date) > 123)
+                throw new TooOldException(date);
+            return new(date);
         }
 
         public override string ToString()
@@ -102,4 +92,15 @@ namespace sh01Zahorulko
         }
     }
 
+    public class TooOldException : Exception
+    {
+        public DateTime Value { get; private set; }
+        public TooOldException(DateTime value) : base($"Date is too far back") => Value = value;
+    }
+
+    public class NotYetBornException : Exception
+    {
+        public DateTime Value { get; private set; }
+        public NotYetBornException(DateTime value) : base($"Date hasn't even been reached") => Value = value;
+    }
 }
